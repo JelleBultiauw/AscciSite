@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="AscciSite — binnenkort online.">
+  <title>AscciSite</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f1110'/%3E%3Ctext x='9' y='43' font-family='monospace' font-weight='700' font-size='30' fill='%237ee787'%3E%26gt%3B_%3C/text%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #0f1110;
+      --fg: #d7dad6;
+      --muted: #8b918c;
+      --accent: #7ee787;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7f5;
+        --fg: #1d201e;
+        --muted: #5d635f;
+        --accent: #1a7f37;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+    main { max-width: 100%; text-align: center; }
+    pre {
+      display: inline-block;
+      max-width: 100%;
+      margin: 0 0 2rem;
+      overflow-x: auto;
+      text-align: left;
+      color: var(--accent);
+      font-size: clamp(8px, 3.4vw, 18px);
+      line-height: 1.15;
+    }
+    p { margin: 0; font-size: 1rem; color: var(--muted); }
+    .cursor {
+      display: inline-block;
+      width: 0.6em;
+      height: 1.1em;
+      margin-left: 0.15em;
+      vertical-align: text-bottom;
+      background: var(--accent);
+      animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .cursor { animation: none; }
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 class="sr-only">AscciSite</h1>
+    <pre aria-hidden="true">    _                 _ ____  _ _
+   / \   ___  ___ ___(_) ___|(_) |_ ___
+  / _ \ / __|/ __/ __| \___ \| | __/ _ \
+ / ___ \\__ \ (_| (__| |___) | | ||  __/
+/_/   \_\___/\___\___|_|____/|_|\__\___|</pre>
+    <p>binnenkort online<span class="cursor" aria-hidden="true"></span></p>
+  </main>
+</body>
+</html>
