@@ -14,7 +14,7 @@ Op de homepagina kun je typen. Commando's:
 | commando  | wat het doet                                                |
 |-----------|-------------------------------------------------------------|
 | `/upload` | kies een video op je toestel (of sleep er een op de pagina) |
-| `<link>`  | plak een link naar een videobestand (.mp4, .webm)           |
+| `<link>`  | plak een TikTok-link, of een link naar een videobestand      |
 | `/beluga` | terug naar de beluga                                        |
 | `/pauze`  | pauzeer of speel verder                                     |
 | `/geluid` | geluid aan of uit                                           |
@@ -22,9 +22,17 @@ Op de homepagina kun je typen. Commando's:
 | `/clear`  | scherm leegmaken                                            |
 
 De gekozen video wordt in de browser live naar ASCII omgezet en niet geüpload: alleen
-wie hem kiest ziet hem. Links werken alleen als ze direct naar een videobestand wijzen
-op een server die andere sites toegang geeft (CORS). Links naar YouTube, TikTok en
-dergelijke zijn webpagina's; sla zo'n video eerst op en gebruik `/upload`.
+wie hem kiest ziet hem.
+
+- **TikTok**: de terminal vraagt het videobestand op bij de gratis API van
+  [tikwm.com](https://www.tikwm.com) en speelt het meteen af.
+- **YouTube, Instagram-reels en andere sites**: daar bestaat geen gratis converter die
+  een website mag gebruiken (YouTube blokkeert ze, Instagram vraagt om in te loggen,
+  en de publieke cobalt-servers hebben een botcheck). De terminal geeft dan een link
+  naar [cobalt.tools](https://cobalt.tools) met je link al ingevuld; download daar de
+  video en gebruik `/upload`.
+- **Directe links** naar een videobestand werken als de server andere sites toegang
+  geeft (CORS).
 
 ## Downloads
 

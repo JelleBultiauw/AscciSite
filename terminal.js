@@ -8,8 +8,11 @@
   const file = document.getElementById('file');
   const pre = document.getElementById('ascii');
   const BELUGA = 'Een zwemmende beluga, getekend met ASCII-tekens';
-  // Sites whose links are web pages rather than video files.
-  const PAGES = /(^|\.)(youtube\.com|youtu\.be|tiktok\.com|instagram\.com|facebook\.com|fb\.watch|vimeo\.com|x\.com|twitter\.com|twitch\.tv|reddit\.com|snapchat\.com)$/;
+  // TikTok links go through the free tikwm.com API: browsers may call it, and the
+  // video file it points to may be read too. Other sites' links are web pages that
+  // only a human can turn into a file (on cobalt.tools, behind a bot check).
+  const TIKTOK = /(^|\.)tiktok\.com$/;
+  const PAGES = /(^|\.)(youtube\.com|youtu\.be|instagram\.com|facebook\.com|fb\.watch|vimeo\.com|x\.com|twitter\.com|twitch\.tv|reddit\.com|snapchat\.com|pinterest\.com|bsky\.app)$/;
   const history = [];
   let back = 0; // how far up the history the arrow keys are
   let video = null; // the <video> on screen
@@ -20,14 +23,15 @@
     help() {
       for (const [name, what] of [
         ['/upload', 'kies een video op je toestel'],
-        ['<link> ', 'plak een link naar een videobestand (.mp4, .webm)'],
+        ['<link>', 'plak een tiktok, of een link naar een videobestand'],
+        ['', 'youtube en reels: download via cobalt.tools, dan /upload'],
         ['/beluga', 'terug naar de beluga'],
-        ['/pauze ', 'pauzeer of speel verder'],
+        ['/pauze', 'pauzeer of speel verder'],
         ['/geluid', 'geluid aan of uit'],
-        ['/vids  ', 'naar de clips'],
-        ['/clear ', 'scherm leegmaken'],
+        ['/vids', 'naar de clips'],
+        ['/clear', 'scherm leegmaken'],
       ]) {
-        print(`${name}  ${what}`);
+        print(`${name.padEnd(9)}${what}`);
       }
     },
     upload() {
@@ -99,13 +103,50 @@
     } catch {
       return print('dat is geen geldige link', 'error');
     }
+    if (TIKTOK.test(host)) return openTikTok(url);
     if (PAGES.test(host)) {
-      return print(`${host} geeft een webpagina, geen videobestand. sla de video op en gebruik /upload`, 'error');
+      const why = /youtu/.test(host)
+        ? 'youtube blokkeert gratis converters voor websites'
+        : /instagram/.test(host)
+          ? "instagram geeft video's alleen aan wie ingelogd is"
+          : 'dit is een webpagina, geen videobestand';
+      return viaCobalt(url, why);
     }
     const element = makeVideo();
     element.crossOrigin = 'anonymous'; // needed to read the pixels of another site's video
     element.src = url;
     show(element, host);
+  }
+
+  async function openTikTok(url) {
+    print('tiktok ophalen via tikwm.com...', 'hint');
+    let found;
+    try {
+      found = await (await fetch(`https://www.tikwm.com/api/?url=${encodeURIComponent(url)}`)).json();
+    } catch {
+      return print('tikwm.com is niet bereikbaar, probeer het zo nog eens', 'error');
+    }
+    const data = found?.code === 0 ? found.data : null;
+    if (data?.images?.length) return print('dit is een fotopost, geen video', 'error');
+    if (!data?.play) return viaCobalt(url, `tikwm vond deze tiktok niet (${found?.msg ?? 'geen antwoord'})`);
+    const element = makeVideo();
+    element.crossOrigin = 'anonymous';
+    element.src = new URL(data.play, 'https://www.tikwm.com').href;
+    show(element, data.author?.unique_id ? `tiktok van @${data.author.unique_id}` : 'tiktok', () =>
+      viaCobalt(url, 'deze tiktok speelt niet af in je browser'),
+    );
+  }
+
+  // cobalt.tools fills in the link from the part after '#'; the person saves the file.
+  function viaCobalt(url, why) {
+    const link = document.createElement('a');
+    link.href = `https://cobalt.tools/#${url}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'pick';
+    link.textContent = '[downloaden via cobalt.tools]';
+    print(`${why}.`, 'error');
+    print([link, ', en daarna /upload of sleep het bestand hierheen'], 'hint');
   }
 
   function openFile(picked) {
@@ -126,7 +167,8 @@
     return element;
   }
 
-  function show(element, name) {
+  // `fallback` explains why a video can't be shown; TikTok's points to cobalt.tools.
+  function show(element, name, fallback = (why) => print(why, 'error')) {
     print(`${name} laden...`, 'hint');
     if (pending) discard(pending);
     pending = element;
@@ -137,7 +179,9 @@
         if (pending !== element) return;
         pending = null;
         if (!readable(element)) {
-          return fail(element, 'deze site laat niet toe dat de beelden gelezen worden. sla de video op en gebruik /upload');
+          return fail(element, () =>
+            fallback('deze site laat niet toe dat de beelden gelezen worden. sla de video op en gebruik /upload'),
+          );
         }
         drop();
         video = element;
@@ -152,11 +196,12 @@
       () => {
         if (pending !== element) return;
         pending = null;
-        fail(
-          element,
-          element.crossOrigin
-            ? 'kan deze link niet afspelen. het moet een directe link naar een videobestand zijn, op een server die dat toestaat. lukt het niet: sla de video op en gebruik /upload'
-            : 'je browser kan dit videoformaat niet afspelen',
+        fail(element, () =>
+          fallback(
+            element.crossOrigin
+              ? 'kan deze link niet afspelen. het moet een directe link naar een videobestand zijn, op een server die dat toestaat. lukt het niet: sla de video op en gebruik /upload'
+              : 'je browser kan dit videoformaat niet afspelen',
+          ),
         );
       },
       { once: true },
@@ -201,9 +246,9 @@
   }
 
   // The new video didn't work out: keep showing whatever was on screen.
-  function fail(element, message) {
+  function fail(element, report) {
     discard(element);
-    print(message, 'error');
+    report();
     video?.play().catch(() => {});
   }
 
@@ -256,7 +301,7 @@
   // Cancelling pointerdown stops the mousedown that follows a tap from taking
   // the focus away again.
   const focus = () => cmd.focus({ preventScroll: true });
-  const elsewhere = (e) => !e.target.closest('label, input');
+  const elsewhere = (e) => !e.target.closest('a, label, input');
   addEventListener('pointerdown', (e) => {
     if (elsewhere(e)) e.preventDefault();
   });
