@@ -2,20 +2,28 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
   <meta name="theme-color" content="#000000">
-  <meta name="description" content="Een zwemmende beluga, helemaal in ASCII.">
+  <meta name="description" content="Een zwemmende beluga in ASCII, en een terminal die elke video in ASCII omzet.">
   <title>AscciSite</title>
   <link rel="icon" href="favicon.svg">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <p class="prompt"><span class="user">guest@asccisite</span>:<span class="path">~</span>$ ./beluga<span id="status"></span></p>
+<body class="layered">
   <main class="screen">
     <pre id="ascii" role="img" aria-label="Een zwemmende beluga, getekend met ASCII-tekens"></pre>
     <noscript>zet javascript aan om de beluga te zien</noscript>
   </main>
+  <section class="terminal" aria-label="Terminal">
+    <div id="log" aria-live="polite"></div>
+    <form id="prompt">
+      <label for="cmd"><span class="user">guest@asccisite</span>:<span class="path">~</span>$ </label>
+      <input id="cmd" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Commando">
+    </form>
+    <input id="file" type="file" accept="video/*" tabindex="-1" aria-hidden="true">
+  </section>
   <script src="player.js" data-src="media/beluga"></script>
+  <script src="terminal.js"></script>
 </body>
 </html>

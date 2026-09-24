@@ -47,3 +47,76 @@ body {
   font-size: 12px;
   white-space: pre;
 }
+
+/* Home page: a terminal floating over a full-screen picture. */
+.layered .screen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+}
+.terminal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  font-size: 14px;
+  line-height: 1.5;
+}
+.line {
+  width: fit-content;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: rgb(0 0 0 / 85%);
+}
+.hint { color: #8b949e; }
+.error { color: #ff7b72; }
+.pick {
+  color: #79c0ff;
+  text-decoration: underline;
+  cursor: pointer;
+}
+#prompt {
+  display: flex;
+  margin: 0;
+  background: rgb(0 0 0 / 85%);
+}
+#prompt label { white-space: pre; }
+#cmd {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  caret-color: #7ee787;
+  caret-shape: block;
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
+}
+#file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+/* The video being converted plays behind the ASCII screen. */
+.source {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: -1;
+}
+/* index.html sets maximum-scale=1, so phones don't zoom in on the small prompt. */
+@media (max-width: 600px) {
+  .terminal { font-size: 13px; }
+}
